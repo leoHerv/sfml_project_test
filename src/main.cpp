@@ -1,4 +1,9 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/Window/Event.hpp>
+
+#include <imgui-SFML.h>
+#include <imgui.h>
 
 #include <iostream>
 
@@ -12,6 +17,7 @@ int main()
     window.setFramerateLimit(144);
     window.setPosition(sf::Vector2i(50, 50));
     //window.setVerticalSyncEnabled(true); Not supported.
+    ImGui::SFML::Init(window);
 
     //=== BIRD TEXTURE ===//
     sf::Texture textureBird;
@@ -85,10 +91,13 @@ int main()
     sf::RenderStates statesAsset;
     statesAsset.texture = &textureAsset;
 
+    sf::Clock deltaClock;
+
     while (window.isOpen())
     {
         for (sf::Event event = sf::Event{}; window.pollEvent(event);)
         {
+            ImGui::SFML::ProcessEvent(event);
             if (event.type == sf::Event::Closed)
             {
                 window.close();
@@ -158,6 +167,10 @@ int main()
 
         } // End events.
 
+        ImGui::SFML::Update(window, deltaClock.restart());
+
+        ImGui::ShowDemoWindow();
+
         // Zoomed View.
         //sf::View view(sf::FloatRect(0.f, 0.f, 500.f, 500.f));
         //window.setView(view);
@@ -181,7 +194,12 @@ int main()
 
         window.draw(triangleStrip, statesAsset);
 
+        ImGui::SFML::Render(window);
+
         // Draw on the window.
         window.display();
     }
+
+    ImGui::SFML::Shutdown();
+    return 0;
 }
