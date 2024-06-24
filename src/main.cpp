@@ -13,6 +13,7 @@ int main()
     window.setPosition(sf::Vector2i(50, 50));
     //window.setVerticalSyncEnabled(true); Not supported.
 
+    //=== BIRD TEXTURE ===//
     sf::Texture textureBird;
     if (!textureBird.loadFromFile("resources/bird.png"))
     {
@@ -20,14 +21,69 @@ int main()
     }
     textureBird.setSmooth(true);
 
+    //=== BIRD SPRITE ===//
     sf::Sprite spriteBird;
     spriteBird.setTexture(textureBird);
 
+    //=== ARIAL FONT ===//
     sf::Font fontArial;
     if (!fontArial.loadFromFile("resources/ARIAL.TTF"))
     {
         std::cout << "Error : load font from 'resources/ARIAL.TTF'" << std::endl;
     }
+
+    //=== ASSET TEXTURE ===//
+    sf::Texture textureAsset;
+    if (!textureAsset.loadFromFile("resources/RPGpack_sheet.png"))
+    {
+        std::cout << "Error : load texture from 'resources/RPGpack_sheet.png'" << std::endl;
+    }
+
+    const unsigned tilesSize = 128;
+    const unsigned tabW = 5;
+    const unsigned tabH = 5;
+    const unsigned tabTextureH[] {0, 1, 1, 1, 2,
+                                  0, 1, 1, 1, 2,
+                                  0, 1, 1, 1, 2,
+                                  0, 1, 1, 1, 2,
+                                  0, 1, 1, 1, 2};
+    const unsigned tabTextureV[] {0, 0, 0, 0, 0,
+                                  1, 1, 1, 1, 1,
+                                  1, 1, 1, 1, 1,
+                                  1, 1, 1, 1, 1,
+                                  2, 2, 2, 2, 2};
+
+    sf::VertexArray triangleStrip(sf::Triangles, 6 * (tabW * tabH));
+
+    for(unsigned i = 0; i < tabW; ++i)
+    {
+        for (unsigned j = 0; j < tabH; ++j)
+        {
+            const unsigned index = (i + j * tabW) * 6;
+            const unsigned indexTileH = tilesSize * i;
+            const unsigned indexTileV = tilesSize * j;
+            triangleStrip[0 + index].position = sf::Vector2f(10.f + indexTileH, 10.f + indexTileV);
+            triangleStrip[1 + index].position = sf::Vector2f(10.f + indexTileH, tilesSize + 10.f + indexTileV);
+            triangleStrip[2 + index].position = sf::Vector2f(tilesSize + 10.f + indexTileH, 10.f + indexTileV);
+            triangleStrip[3 + index].position = sf::Vector2f(10.f + indexTileH, tilesSize + 10.f + indexTileV);
+            triangleStrip[4 + index].position = sf::Vector2f(tilesSize + 10.f + indexTileH, 10.f + indexTileV);
+            triangleStrip[5 + index].position = sf::Vector2f(tilesSize + 10.f + indexTileH,
+                                                             tilesSize + 10.f + indexTileV);
+
+            const unsigned indexTex = i + j * tabW;
+            const unsigned textureHIndex = (tabTextureH[indexTex] + 10) * tilesSize;
+            const unsigned textureVIndex = tabTextureV[indexTex] * tilesSize;
+            triangleStrip[0 + index].texCoords = sf::Vector2f(textureHIndex, textureVIndex);
+            triangleStrip[1 + index].texCoords = sf::Vector2f(textureHIndex, tilesSize + textureVIndex);
+            triangleStrip[2 + index].texCoords = sf::Vector2f(tilesSize + textureHIndex, textureVIndex);
+            triangleStrip[3 + index].texCoords = sf::Vector2f(textureHIndex, tilesSize + textureVIndex);
+            triangleStrip[4 + index].texCoords = sf::Vector2f(tilesSize + textureHIndex, textureVIndex);
+            triangleStrip[5 + index].texCoords = sf::Vector2f(tilesSize + textureHIndex, tilesSize + textureVIndex);
+        }
+    }
+
+    sf::RenderStates statesAsset;
+    statesAsset.texture = &textureAsset;
 
     while (window.isOpen())
     {
@@ -121,6 +177,9 @@ int main()
         text.setPosition(100.f, 100.f);
 
         window.draw(text);
+
+
+        window.draw(triangleStrip, statesAsset);
 
         // Draw on the window.
         window.display();
